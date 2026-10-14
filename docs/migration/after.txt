@@ -16,68 +16,76 @@ TAP version 13
 # Subtest: buildHttpApp fails closed without a token or explicit opt-out
 ok 1 - buildHttpApp fails closed without a token or explicit opt-out
   ---
-  duration_ms: 3.438585
+  duration_ms: 4.352647
   ...
 # Subtest: rejects a request with no bearer token (401)
 ok 2 - rejects a request with no bearer token (401)
   ---
-  duration_ms: 24.42913
+  duration_ms: 26.170238
   ...
 # Subtest: rejects a request with a wrong bearer token (401)
 ok 3 - rejects a request with a wrong bearer token (401)
   ---
-  duration_ms: 8.30605
+  duration_ms: 9.592819
   ...
 # rejected request with disallowed origin: http://evil.example
 # Subtest: rejects a disallowed browser Origin (403)
 ok 4 - rejects a disallowed browser Origin (403)
   ---
-  duration_ms: 4.747883
+  duration_ms: 5.21494
   ...
 # Subtest: rejects a spoofed Host header / DNS rebinding (403)
 ok 5 - rejects a spoofed Host header / DNS rebinding (403)
   ---
-  duration_ms: 3.08548
+  duration_ms: 3.559335
   ...
 # Subtest: accepts an authenticated loopback request (200)
 ok 6 - accepts an authenticated loopback request (200)
   ---
-  duration_ms: 18.139477
+  duration_ms: 20.554708
   ...
 # Subtest: --allow-unauthenticated serves without a token (200)
 ok 7 - --allow-unauthenticated serves without a token (200)
   ---
-  duration_ms: 5.058954
+  duration_ms: 5.128041
   ...
 # Subtest: honours an explicitly allowed Origin
 ok 8 - honours an explicitly allowed Origin
   ---
-  duration_ms: 5.166873
+  duration_ms: 4.525851
   ...
 # Subtest: connecting one McpServer twice throws ALREADY_CONNECTED
 ok 9 - connecting one McpServer twice throws ALREADY_CONNECTED
   ---
-  duration_ms: 0.873377
+  duration_ms: 0.845631
   ...
 # Subtest: two sequential stateless POST /mcp requests both succeed
 ok 10 - two sequential stateless POST /mcp requests both succeed
   ---
-  duration_ms: 8.808438
+  duration_ms: 8.353042
   ...
-# Subtest: unknown tool error code is still InvalidParams (-32602)
-ok 11 - unknown tool error code is still InvalidParams (-32602)
+# Subtest: unknown tool returns the v1 isError tool result
+ok 11 - unknown tool returns the v1 isError tool result
   ---
-  duration_ms: 7.115122
+  duration_ms: 7.175891
   ...
-1..11
-# tests 11
+# Authenticating with pat
+# Authenticating PAT for test-user
+# Authenticating with pat
+# Subtest: two sequential tool calls share one Docker Hub login
+ok 12 - two sequential tool calls share one Docker Hub login
+  ---
+  duration_ms: 17.380752
+  ...
+1..12
+# tests 12
 # suites 0
-# pass 11
+# pass 12
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 311.639157
+# duration_ms 359.230932
 TEST_EXIT:0
 
 === npm run build (typecheck via tsc) ===
