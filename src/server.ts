@@ -381,6 +381,10 @@ export class HubMCPServer {
                 });
                 // New server per request. Reusing this.server throws ALREADY_CONNECTED.
                 const { server } = this.createMcpServer();
+                res.on('close', () => {
+                    transport.close();
+                    server.close();
+                });
                 await server.connect(transport);
                 await transport.handleRequest(req, res, req.body);
             } catch (error) {
