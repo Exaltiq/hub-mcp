@@ -76,9 +76,27 @@ function safeCompare(a: string, b: string): boolean {
 export class HubMCPServer {
     private readonly server: Server;
     private readonly assets: Asset[];
+    private readonly username?: string;
+    private readonly patToken?: string;
 
     constructor(username?: string, patToken?: string) {
-        this.server = new Server(
+        this.username = username;
+        this.patToken = patToken;
+        // stdio uses one long-lived server. HTTP builds a new one per request.
+        const built = this.createMcpServer();
+        this.server = built.server;
+        this.assets = built.assets;
+    }
+
+    /**
+     * Fresh MCP server with the Docker Hub tools registered on it.
+     *
+     * SDK 2.3+ rejects a second `connect()` on the same server with
+     * SdkErrorCode.AlreadyConnected. Stateless POST /mcp creates a new
+     * transport every request, so it needs a new server too.
+     */
+    private createMcpServer(): { server: Server; assets: Asset[] } {
+        const server = new Server(
             {
                 name: 'dockerhub-mcp-server',
                 version: '1.0.0',
@@ -90,42 +108,36 @@ export class HubMCPServer {
             }
         );
 
-        this.assets = [
-            new Repos(this.server, {
+        const patAuth = {
+            type: 'pat' as const,
+            token: this.patToken,
+            username: this.username,
+        };
+        const assets: Asset[] = [
+            new Repos(server, {
                 name: 'repos',
                 host: 'https://hub.docker.com/v2',
-                auth: {
-                    type: 'pat',
-                    token: patToken,
-                    username: username,
-                },
+                auth: patAuth,
             }),
-            new Accounts(this.server, {
+            new Accounts(server, {
                 name: 'accounts',
                 host: 'https://hub.docker.com/v2',
-                auth: {
-                    type: 'pat',
-                    token: patToken,
-                    username: username,
-                },
+                auth: patAuth,
             }),
-            new Search(this.server, {
+            new Search(server, {
                 name: 'search',
                 host: 'https://hub.docker.com/api/search',
             }),
-            new ScoutAPI(this.server, {
+            new ScoutAPI(server, {
                 name: 'scout',
                 host: 'https://api.scout.docker.com',
-                auth: {
-                    type: 'pat',
-                    token: patToken,
-                    username: username,
-                },
+                auth: patAuth,
             }),
         ];
-        for (const asset of this.assets) {
+        for (const asset of assets) {
             asset.RegisterTools();
         }
+        return { server, assets };
     }
 
     async run(
@@ -321,8 +333,9 @@ export class HubMCPServer {
                     sessionIdGenerator: undefined,
                     enableJsonResponse: true,
                 });
-
-                await this.server.connect(transport);
+                // New server per request. Reusing this.server throws ALREADY_CONNECTED.
+                const { server } = this.createMcpServer();
+                await server.connect(transport);
                 await transport.handleRequest(req, res, req.body);
             } catch (error) {
                 logger.info(`error handling mcp request: ${error}`);
