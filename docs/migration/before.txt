@@ -1,0 +1,103 @@
+=== node -v ===
+v22.14.0
+
+=== engines ===
+{
+  "node": ">=22"
+}
+
+=== npm test ===
+
+> dockerhub-mcp-server@1.0.0 test
+> tsc -p tsconfig.test.json && node --test "dist-test/**/*.test.js"
+
+TAP version 13
+# logs dir unspecified
+# Subtest: buildHttpApp fails closed without a token or explicit opt-out
+ok 1 - buildHttpApp fails closed without a token or explicit opt-out
+  ---
+  duration_ms: 13.46168
+  ...
+# Subtest: rejects a request with no bearer token (401)
+ok 2 - rejects a request with no bearer token (401)
+  ---
+  duration_ms: 48.344386
+  ...
+# Subtest: rejects a request with a wrong bearer token (401)
+ok 3 - rejects a request with a wrong bearer token (401)
+  ---
+  duration_ms: 8.885934
+  ...
+# rejected request with disallowed origin: http://evil.example
+# Subtest: rejects a disallowed browser Origin (403)
+ok 4 - rejects a disallowed browser Origin (403)
+  ---
+  duration_ms: 6.060317
+  ...
+# Subtest: rejects a spoofed Host header / DNS rebinding (403)
+ok 5 - rejects a spoofed Host header / DNS rebinding (403)
+  ---
+  duration_ms: 4.382081
+  ...
+# Subtest: accepts an authenticated loopback request (200)
+ok 6 - accepts an authenticated loopback request (200)
+  ---
+  duration_ms: 13.561654
+  ...
+# Subtest: --allow-unauthenticated serves without a token (200)
+ok 7 - --allow-unauthenticated serves without a token (200)
+  ---
+  duration_ms: 5.604621
+  ...
+# Subtest: honours an explicitly allowed Origin
+ok 8 - honours an explicitly allowed Origin
+  ---
+  duration_ms: 5.292469
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 411.343318
+TEST_EXIT:0
+
+=== npm run build (typecheck via tsc) ===
+
+> dockerhub-mcp-server@1.0.0 build
+> tsc
+
+BUILD_EXIT:0
+
+=== npm run lint ===
+
+> dockerhub-mcp-server@1.0.0 lint
+> eslint --ext .ts .
+
+LINT_EXIT:0
+
+=== npm run format:check ===
+
+> dockerhub-mcp-server@1.0.0 format:check
+> prettier --check "**/*.+(ts|json)"
+
+Checking formatting...
+All matched files use Prettier code style!
+FORMAT_EXIT:0
+
+=== npm run list-tools:check ===
+
+> dockerhub-mcp-server@1.0.0 list-tools:check
+> npm run build && node dist/scripts/toolsList.js check-tools-list
+
+
+> dockerhub-mcp-server@1.0.0 build
+> tsc
+
+logs dir unspecified
+Tools list is up to date. ✅
+Tools names are up to date. ✅
+TOOLS_EXIT:0
