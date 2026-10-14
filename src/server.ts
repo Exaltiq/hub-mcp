@@ -17,7 +17,11 @@
 
 import { createHash, timingSafeEqual } from 'crypto';
 import express, { Express, NextFunction, Request, Response } from 'express';
-import { McpServer as Server } from '@modelcontextprotocol/server';
+import {
+    McpServer as Server,
+    ProtocolError,
+    ProtocolErrorCode,
+} from '@modelcontextprotocol/server';
 import { NodeStreamableHTTPServerTransport } from '@modelcontextprotocol/node';
 import { StdioServerTransport } from '@modelcontextprotocol/server/stdio';
 import {
@@ -71,6 +75,47 @@ function safeCompare(a: string, b: string): boolean {
     const ah = createHash('sha256').update(a).digest();
     const bh = createHash('sha256').update(b).digest();
     return timingSafeEqual(ah, bh);
+}
+
+type ToolsCallHandler = (request: unknown, ctx: unknown) => Promise<unknown>;
+
+/**
+ * v1 turned an unknown tool into an isError tool result whose text was
+ * `MCP error -32602: Tool <name> not found`. v2 throws that as a JSON-RPC
+ * error before its tool-result catch. Wrap the registered handler so the
+ * wire shape stays the v1 result.
+ */
+function preserveV1UnknownToolResult(server: Server): void {
+    const protocol = server.server as unknown as {
+        _getRequestHandler(method: string): ToolsCallHandler | undefined;
+        _requestHandlers: Map<string, ToolsCallHandler>;
+    };
+    const original = protocol._getRequestHandler('tools/call');
+    if (!original) {
+        return;
+    }
+    protocol._requestHandlers.set('tools/call', async (request, ctx) => {
+        try {
+            return await original(request, ctx);
+        } catch (error) {
+            if (
+                ProtocolError.isInstance(error) &&
+                error.code === ProtocolErrorCode.InvalidParams &&
+                /^Tool .+ not found$/.test(error.message)
+            ) {
+                return {
+                    content: [
+                        {
+                            type: 'text',
+                            text: `MCP error ${ProtocolErrorCode.InvalidParams}: ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+            throw error;
+        }
+    });
 }
 
 export class HubMCPServer {
@@ -137,6 +182,7 @@ export class HubMCPServer {
         for (const asset of assets) {
             asset.RegisterTools();
         }
+        preserveV1UnknownToolResult(server);
         return { server, assets };
     }
 
