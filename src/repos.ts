@@ -14,11 +14,10 @@
    limitations under the License.
 */
 
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
+import { McpServer, CallToolResult } from "@modelcontextprotocol/server";
 import { Asset, AssetConfig } from './asset';
 import { z } from 'zod';
 import { createPaginatedResponseSchema } from './types';
-import { CallToolResult } from '@modelcontextprotocol/sdk/types';
 import { logger } from './logger';
 
 //#region  Types
@@ -234,48 +233,49 @@ export class Repos extends Asset {
         // List Repositories by Namespace
         this.tools.set(
             'listRepositoriesByNamespace',
+            /* @mcp-codemod-error Could not verify `outputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'listRepositoriesByNamespace',
                 {
                     description: 'List paginated repositories by namespace',
-                    inputSchema: {
-                        namespace: z.string().describe('The namespace to list repositories from'),
-                        page: z
-                            .number()
-                            .optional()
-                            .describe('The page number to list repositories from'),
-                        page_size: z
-                            .number()
-                            .optional()
-                            .describe('The page size to list repositories from'),
-                        ordering: z
-                            .enum([
-                                'last_updated',
-                                '-last_updated',
-                                'name',
-                                '-name',
-                                'pull_count',
-                                '-pull_count',
-                            ])
-                            .optional()
-                            .describe(
-                                'The ordering of the repositories. Use "-" to reverse the ordering. For example, "last_updated" will order the repositories by last updated in descending order while "-last_updated" will order the repositories by last updated in ascending order.'
-                            ),
-                        media_types: z
-                            .string()
-                            .optional()
-                            .default('')
-                            .describe(
-                                'Comma-delimited list of media types. Only repositories containing one or more artifacts with one of these media types will be returned. Default is empty to get all repositories.'
-                            ),
-                        content_types: z
-                            .string()
-                            .optional()
-                            .default('')
-                            .describe(
-                                'Comma-delimited list of content types. Only repositories containing one or more artifacts with one of these content types will be returned. Default is empty to get all repositories.'
-                            ),
-                    },
+                    inputSchema: z.object({
+                                            namespace: z.string().describe('The namespace to list repositories from'),
+                                            page: z
+                                                .number()
+                                                .optional()
+                                                .describe('The page number to list repositories from'),
+                                            page_size: z
+                                                .number()
+                                                .optional()
+                                                .describe('The page size to list repositories from'),
+                                            ordering: z
+                                                .enum([
+                                                    'last_updated',
+                                                    '-last_updated',
+                                                    'name',
+                                                    '-name',
+                                                    'pull_count',
+                                                    '-pull_count',
+                                                ])
+                                                .optional()
+                                                .describe(
+                                                    'The ordering of the repositories. Use "-" to reverse the ordering. For example, "last_updated" will order the repositories by last updated in descending order while "-last_updated" will order the repositories by last updated in ascending order.'
+                                                ),
+                                            media_types: z
+                                                .string()
+                                                .optional()
+                                                .default('')
+                                                .describe(
+                                                    'Comma-delimited list of media types. Only repositories containing one or more artifacts with one of these media types will be returned. Default is empty to get all repositories.'
+                                                ),
+                                            content_types: z
+                                                .string()
+                                                .optional()
+                                                .default('')
+                                                .describe(
+                                                    'Comma-delimited list of content types. Only repositories containing one or more artifacts with one of these content types will be returned. Default is empty to get all repositories.'
+                                                ),
+                                        }),
                     outputSchema: repositoryPaginatedResponseSchema.shape,
                     annotations: {
                         title: 'List Repositories by Namespace',
@@ -288,6 +288,7 @@ export class Repos extends Asset {
         // Create Repository
         this.tools.set(
             'createRepository',
+            /* @mcp-codemod-error Could not verify `inputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. | Could not verify `outputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'createRepository',
                 {
@@ -306,6 +307,7 @@ export class Repos extends Asset {
         // Get Repository Info
         this.tools.set(
             'getRepositoryInfo',
+            /* @mcp-codemod-error Could not verify `inputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. | Could not verify `outputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'getRepositoryInfo',
                 {
@@ -331,6 +333,7 @@ export class Repos extends Asset {
         // Update Repository Info
         this.tools.set(
             'updateRepositoryInfo',
+            /* @mcp-codemod-error Could not verify `inputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. | Could not verify `outputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'updateRepositoryInfo',
                 {
@@ -375,6 +378,7 @@ export class Repos extends Asset {
         // Check Repository Exists
         this.tools.set(
             'checkRepository',
+            /* @mcp-codemod-error Could not verify `inputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'checkRepository',
                 {
@@ -392,6 +396,7 @@ export class Repos extends Asset {
         // List Repository Tags
         this.tools.set(
             'listRepositoryTags',
+            /* @mcp-codemod-error Could not verify `inputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. | Could not verify `outputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'listRepositoryTags',
                 {
@@ -441,6 +446,7 @@ export class Repos extends Asset {
         // Get Repository Tag
         this.tools.set(
             'getRepositoryTag',
+            /* @mcp-codemod-error Could not verify `inputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. | Could not verify `outputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'getRepositoryTag',
                 {
@@ -463,6 +469,7 @@ export class Repos extends Asset {
         // Check Repository Tag
         this.tools.set(
             'checkRepositoryTag',
+            /* @mcp-codemod-error Could not verify `inputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'checkRepositoryTag',
                 {

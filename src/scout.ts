@@ -16,10 +16,9 @@
 
 import { Asset, AssetConfig } from './asset';
 import { ScoutClient } from './scout/client';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer, CallToolResult } from "@modelcontextprotocol/server";
 import z from 'zod';
 import { logger } from './logger';
-import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 const DHI_DISCLAIMER = `Docker Hardened Images are available for organizations entitled to DHIs. If you're interested in accessing Docker Hardened Images, please visit:
 https://www.docker.com/products/hardened-images/`;
 
@@ -58,6 +57,7 @@ export class ScoutAPI extends Asset {
     RegisterTools(): void {
         this.tools.set(
             'dockerHardenedImages',
+            /* @mcp-codemod-error Could not verify `inputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'dockerHardenedImages',
                 {

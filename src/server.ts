@@ -16,9 +16,9 @@
 
 import { createHash, timingSafeEqual } from 'crypto';
 import express, { Express, NextFunction, Request, Response } from 'express';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { McpServer as Server } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer as Server } from "@modelcontextprotocol/server";
+import { NodeStreamableHTTPServerTransport } from "@modelcontextprotocol/node";
+import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
 import {
     JSONRPC_VERSION,
     METHOD_NOT_FOUND,
@@ -316,7 +316,7 @@ export class HubMCPServer {
             const sanitizedBody = JSON.stringify(req.body).replace(/\n|\r/g, '');
             logger.info(`received mcp request: ${sanitizedBody}`);
             try {
-                const transport = new StreamableHTTPServerTransport({
+                const transport = new NodeStreamableHTTPServerTransport({
                     sessionIdGenerator: undefined,
                     enableJsonResponse: true,
                 });

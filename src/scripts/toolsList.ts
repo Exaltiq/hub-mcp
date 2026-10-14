@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-import { Tool } from '@modelcontextprotocol/sdk/types.js';
+import { Tool } from "@modelcontextprotocol/server";
 import { HubMCPServer } from '../server';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import _ from 'lodash';
