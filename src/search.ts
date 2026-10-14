@@ -1,5 +1,6 @@
 /*
    Copyright 2025 Docker Hub MCP Server authors
+   Modified by Exaltiq
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
    limitations under the License.
 */
 
-import { McpServer, CallToolResult } from "@modelcontextprotocol/server";
+import { McpServer, CallToolResult } from '@modelcontextprotocol/server';
 import { Asset, AssetConfig } from './asset';
 import { z } from 'zod';
 import { logger } from './logger';
@@ -97,64 +98,64 @@ export class Search extends Asset {
                     description:
                         'Search for repositories in Docker Hub. It sorts results by best match if no sort criteria is provided. If user asks for secure, production-ready images the "dockerHardenedImages" tool should be called first to get the list of DHI images available in the user organisations (if any) and fallback to search tool if no DHI images are available or user is not authenticated.',
                     inputSchema: z.object({
-                                            query: z.string().describe('The query to search for'),
-                                            badges: z
-                                                .array(
-                                                    z.enum([
-                                                        'official',
-                                                        'verified_publisher',
-                                                        'open_source',
-                                                        'hardened',
-                                                    ])
-                                                )
-                                                .optional()
-                                                .describe(
-                                                    'The trusted content to search for. Use "hardened" for Docker Hardened Images'
-                                                ),
-                                            type: z
-                                                .string()
-                                                .optional()
-                                                .describe('The type of the repository to search for'),
-                                            categories: z
-                                                .array(z.string())
-                                                .optional()
-                                                .describe('The categories names to filter search results'),
-                                            architectures: z
-                                                .array(z.string())
-                                                .optional()
-                                                .describe('The architectures to filter search results'),
-                                            operating_systems: z
-                                                .array(z.string())
-                                                .optional()
-                                                .describe('The operating systems to filter search results'),
-                                            extension_reviewed: z
-                                                .boolean()
-                                                .optional()
-                                                .describe(
-                                                    'Whether to filter search results to only include reviewed extensions'
-                                                ),
-                                            from: z.number().optional().describe('The number of repositories to skip'),
-                                            size: z
-                                                .number()
-                                                .optional()
-                                                .describe('The number of repositories to return'),
-                                            sort: z
-                                                .enum(['pull_count', 'updated_at'])
-                                                .optional()
-                                                .nullable()
-                                                .describe(
-                                                    'The criteria to sort the search results by. If the `sort` field is not set, the best match is used by default. When search extensions, documents are sort alphabetically if none is provided. Do not use it unless user explicitly asks for it.'
-                                                ),
-                                            order: z
-                                                .enum(['asc', 'desc'])
-                                                .optional()
-                                                .nullable()
-                                                .describe('The order to sort the search results by'),
-                                            images: z
-                                                .array(z.string())
-                                                .optional()
-                                                .describe('The images to filter search results'),
-                                        }),
+                        query: z.string().describe('The query to search for'),
+                        badges: z
+                            .array(
+                                z.enum([
+                                    'official',
+                                    'verified_publisher',
+                                    'open_source',
+                                    'hardened',
+                                ])
+                            )
+                            .optional()
+                            .describe(
+                                'The trusted content to search for. Use "hardened" for Docker Hardened Images'
+                            ),
+                        type: z
+                            .string()
+                            .optional()
+                            .describe('The type of the repository to search for'),
+                        categories: z
+                            .array(z.string())
+                            .optional()
+                            .describe('The categories names to filter search results'),
+                        architectures: z
+                            .array(z.string())
+                            .optional()
+                            .describe('The architectures to filter search results'),
+                        operating_systems: z
+                            .array(z.string())
+                            .optional()
+                            .describe('The operating systems to filter search results'),
+                        extension_reviewed: z
+                            .boolean()
+                            .optional()
+                            .describe(
+                                'Whether to filter search results to only include reviewed extensions'
+                            ),
+                        from: z.number().optional().describe('The number of repositories to skip'),
+                        size: z
+                            .number()
+                            .optional()
+                            .describe('The number of repositories to return'),
+                        sort: z
+                            .enum(['pull_count', 'updated_at'])
+                            .optional()
+                            .nullable()
+                            .describe(
+                                'The criteria to sort the search results by. If the `sort` field is not set, the best match is used by default. When search extensions, documents are sort alphabetically if none is provided. Do not use it unless user explicitly asks for it.'
+                            ),
+                        order: z
+                            .enum(['asc', 'desc'])
+                            .optional()
+                            .nullable()
+                            .describe('The order to sort the search results by'),
+                        images: z
+                            .array(z.string())
+                            .optional()
+                            .describe('The images to filter search results'),
+                    }),
                     outputSchema: searchResults.shape,
                     annotations: {
                         title: 'Search Repositories',

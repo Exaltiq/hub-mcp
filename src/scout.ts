@@ -1,5 +1,6 @@
 /*
    Copyright 2025 Docker Hub MCP Server authors
+   Modified by Exaltiq
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,7 +17,7 @@
 
 import { Asset, AssetConfig } from './asset';
 import { ScoutClient } from './scout/client';
-import { McpServer, CallToolResult } from "@modelcontextprotocol/server";
+import { McpServer, CallToolResult } from '@modelcontextprotocol/server';
 import z from 'zod';
 import { logger } from './logger';
 const DHI_DISCLAIMER = `Docker Hardened Images are available for organizations entitled to DHIs. If you're interested in accessing Docker Hardened Images, please visit:

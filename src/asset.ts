@@ -1,5 +1,6 @@
 /*
    Copyright 2025 Docker Hub MCP Server authors
+   Modified by Exaltiq
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
    limitations under the License.
 */
 
-import { CallToolResult, RegisteredTool } from "@modelcontextprotocol/server";
+import { CallToolResult, RegisteredTool } from '@modelcontextprotocol/server';
 import { logger } from './logger';
 import { jwtDecode } from 'jwt-decode';
 

@@ -1,5 +1,6 @@
 /*
    Copyright 2025 Docker Hub MCP Server authors
+   Modified by Exaltiq
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
    limitations under the License.
 */
 
-import { McpServer, CallToolResult } from "@modelcontextprotocol/server";
+import { McpServer, CallToolResult } from '@modelcontextprotocol/server';
 import { Asset, AssetConfig } from './asset';
 import { z } from 'zod';
 import { createPaginatedResponseSchema } from './types';
@@ -239,43 +240,43 @@ export class Repos extends Asset {
                 {
                     description: 'List paginated repositories by namespace',
                     inputSchema: z.object({
-                                            namespace: z.string().describe('The namespace to list repositories from'),
-                                            page: z
-                                                .number()
-                                                .optional()
-                                                .describe('The page number to list repositories from'),
-                                            page_size: z
-                                                .number()
-                                                .optional()
-                                                .describe('The page size to list repositories from'),
-                                            ordering: z
-                                                .enum([
-                                                    'last_updated',
-                                                    '-last_updated',
-                                                    'name',
-                                                    '-name',
-                                                    'pull_count',
-                                                    '-pull_count',
-                                                ])
-                                                .optional()
-                                                .describe(
-                                                    'The ordering of the repositories. Use "-" to reverse the ordering. For example, "last_updated" will order the repositories by last updated in descending order while "-last_updated" will order the repositories by last updated in ascending order.'
-                                                ),
-                                            media_types: z
-                                                .string()
-                                                .optional()
-                                                .default('')
-                                                .describe(
-                                                    'Comma-delimited list of media types. Only repositories containing one or more artifacts with one of these media types will be returned. Default is empty to get all repositories.'
-                                                ),
-                                            content_types: z
-                                                .string()
-                                                .optional()
-                                                .default('')
-                                                .describe(
-                                                    'Comma-delimited list of content types. Only repositories containing one or more artifacts with one of these content types will be returned. Default is empty to get all repositories.'
-                                                ),
-                                        }),
+                        namespace: z.string().describe('The namespace to list repositories from'),
+                        page: z
+                            .number()
+                            .optional()
+                            .describe('The page number to list repositories from'),
+                        page_size: z
+                            .number()
+                            .optional()
+                            .describe('The page size to list repositories from'),
+                        ordering: z
+                            .enum([
+                                'last_updated',
+                                '-last_updated',
+                                'name',
+                                '-name',
+                                'pull_count',
+                                '-pull_count',
+                            ])
+                            .optional()
+                            .describe(
+                                'The ordering of the repositories. Use "-" to reverse the ordering. For example, "last_updated" will order the repositories by last updated in descending order while "-last_updated" will order the repositories by last updated in ascending order.'
+                            ),
+                        media_types: z
+                            .string()
+                            .optional()
+                            .default('')
+                            .describe(
+                                'Comma-delimited list of media types. Only repositories containing one or more artifacts with one of these media types will be returned. Default is empty to get all repositories.'
+                            ),
+                        content_types: z
+                            .string()
+                            .optional()
+                            .default('')
+                            .describe(
+                                'Comma-delimited list of content types. Only repositories containing one or more artifacts with one of these content types will be returned. Default is empty to get all repositories.'
+                            ),
+                    }),
                     outputSchema: repositoryPaginatedResponseSchema.shape,
                     annotations: {
                         title: 'List Repositories by Namespace',
