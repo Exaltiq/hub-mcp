@@ -20,7 +20,7 @@ import http from 'node:http';
 import { AddressInfo } from 'node:net';
 import { test } from 'node:test';
 import { NodeStreamableHTTPServerTransport } from '@modelcontextprotocol/node';
-import { McpServer, ProtocolErrorCode, SdkError, SdkErrorCode } from '@modelcontextprotocol/server';
+import { McpServer, SdkError, SdkErrorCode } from '@modelcontextprotocol/server';
 import { clearSharedPatTokens } from './asset';
 import { HttpTransportOptions, HubMCPServer } from './server';
 
@@ -202,7 +202,7 @@ test('two sequential stateless POST /mcp requests both succeed', async () => {
     });
 });
 
-test('unknown tool error code is still InvalidParams (-32602)', async () => {
+test('unknown tool returns the v1 isError tool result', async () => {
     const call = JSON.stringify({
         jsonrpc: '2.0',
         id: 2,
@@ -212,14 +212,19 @@ test('unknown tool error code is still InvalidParams (-32602)', async () => {
     await withServer(AUTH_OPTIONS, async (port) => {
         const res = await post(port, bearer, call);
         assert.equal(res.status, 200);
-        const body = JSON.parse(res.body);
-        // Same numeric code as v1 (ErrorCode.InvalidParams). v1 embedded it in an
-        // isError tool result ("MCP error -32602: Tool ... not found"); v2 reports
-        // it as the JSON-RPC error code.
-        assert.equal(ProtocolErrorCode.InvalidParams, -32602);
-        assert.equal(body.error.code, -32602);
-        assert.equal(body.error.code, ProtocolErrorCode.InvalidParams);
-        assert.match(body.error.message, /Tool this-tool-does-not-exist not found/);
+        assert.deepEqual(JSON.parse(res.body), {
+            result: {
+                content: [
+                    {
+                        type: 'text',
+                        text: 'MCP error -32602: Tool this-tool-does-not-exist not found',
+                    },
+                ],
+                isError: true,
+            },
+            jsonrpc: '2.0',
+            id: 2,
+        });
     });
 });
 
