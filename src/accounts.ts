@@ -1,5 +1,6 @@
 /*
    Copyright 2025 Docker Hub MCP Server authors
+   Modified by Exaltiq
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
    limitations under the License.
 */
 
-import { McpServer, CallToolResult } from "@modelcontextprotocol/server";
+import { McpServer, CallToolResult } from '@modelcontextprotocol/server';
 import { Asset, AssetConfig } from './asset';
 import { z } from 'zod';
 import { createPaginatedResponseSchema } from './types';
@@ -63,15 +64,15 @@ export class Accounts extends Asset {
                 {
                     description: 'List paginated namespaces',
                     inputSchema: z.object({
-                                            page: z
-                                                .number()
-                                                .optional()
-                                                .describe('The page number to list repositories from'),
-                                            page_size: z
-                                                .number()
-                                                .optional()
-                                                .describe('The page size to list repositories from'),
-                                        }),
+                        page: z
+                            .number()
+                            .optional()
+                            .describe('The page number to list repositories from'),
+                        page_size: z
+                            .number()
+                            .optional()
+                            .describe('The page size to list repositories from'),
+                    }),
                     outputSchema: namespacePaginatedResponseSchema.shape,
                     annotations: {
                         title: 'List Namespaces',
