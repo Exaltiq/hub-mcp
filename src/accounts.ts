@@ -14,11 +14,10 @@
    limitations under the License.
 */
 
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
+import { McpServer, CallToolResult } from "@modelcontextprotocol/server";
 import { Asset, AssetConfig } from './asset';
 import { z } from 'zod';
 import { createPaginatedResponseSchema } from './types';
-import { CallToolResult } from '@modelcontextprotocol/sdk/types';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
 
 //#region  Types
@@ -58,20 +57,21 @@ export class Accounts extends Asset {
     RegisterTools(): void {
         this.tools.set(
             'listNamespaces',
+            /* @mcp-codemod-error Could not verify `outputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'listNamespaces',
                 {
                     description: 'List paginated namespaces',
-                    inputSchema: {
-                        page: z
-                            .number()
-                            .optional()
-                            .describe('The page number to list repositories from'),
-                        page_size: z
-                            .number()
-                            .optional()
-                            .describe('The page size to list repositories from'),
-                    },
+                    inputSchema: z.object({
+                                            page: z
+                                                .number()
+                                                .optional()
+                                                .describe('The page number to list repositories from'),
+                                            page_size: z
+                                                .number()
+                                                .optional()
+                                                .describe('The page size to list repositories from'),
+                                        }),
                     outputSchema: namespacePaginatedResponseSchema.shape,
                     annotations: {
                         title: 'List Namespaces',
