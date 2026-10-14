@@ -35,11 +35,21 @@ export type AssetResponse<T> = {
     code: number;
 };
 
+type CachedPat = { token: string; expirationDate: Date };
+
+// One cache for the process. HTTP builds a new McpServer per request, but a
+// Docker Hub JWT should be reused until it expires, the way the single v1
+// server reused `this.tokens`.
+const sharedPatTokens = new Map<string, CachedPat>();
+
+/** Drops cached Hub JWTs. Tests use this so login counts start from empty. */
+export function clearSharedPatTokens(): void {
+    sharedPatTokens.clear();
+}
+
 export class Asset implements Asset {
     protected tools: Map<string, RegisteredTool>;
-    protected tokens: Map<string, { token: string; expirationDate: Date }>;
     constructor(protected config: AssetConfig) {
-        this.tokens = new Map();
         this.tools = new Map();
     }
     RegisterTools(): void {
@@ -168,27 +178,27 @@ export class Asset implements Asset {
                 case 'pat': {
                     if (!this.config.auth.username || !this.config.auth.token) {
                         logger.warn(`No username or token provided for PAT auth`);
-                        this.tokens.set(this.config.auth.username!, {
+                        sharedPatTokens.set(this.config.auth.username!, {
                             token: '',
                             expirationDate: new Date('2030-01-01'),
                         });
                         return '';
                     }
-                    if (!this.tokens.get(this.config.auth.username!)) {
+                    const cached = sharedPatTokens.get(this.config.auth.username!);
+                    if (!cached) {
                         const token = await this.authenticatePAT(this.config.auth.username!);
                         // get expiration date from token
                         const decoded = jwtDecode<{ exp: number }>(token);
                         const expirationDate = new Date(decoded.exp * 1000);
-                        this.tokens.set(this.config.auth.username!, { token, expirationDate });
+                        sharedPatTokens.set(this.config.auth.username!, { token, expirationDate });
                         return token;
                     }
-                    const token = this.tokens.get(this.config.auth.username!)!;
-                    if (token.expirationDate < new Date()) {
-                        // invalidate token
-                        this.tokens.delete(this.config.auth.username!);
+                    if (cached.expirationDate < new Date()) {
+                        // invalidate token and refresh
+                        sharedPatTokens.delete(this.config.auth.username!);
                         return this.authenticate();
                     }
-                    return token.token;
+                    return cached.token;
                 }
                 default:
                     throw new Error(`Unsupported auth type: ${this.config.auth.type}`);
