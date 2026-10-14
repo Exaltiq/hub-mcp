@@ -21,6 +21,7 @@ import { AddressInfo } from 'node:net';
 import { test } from 'node:test';
 import { NodeStreamableHTTPServerTransport } from '@modelcontextprotocol/node';
 import { McpServer, ProtocolErrorCode, SdkError, SdkErrorCode } from '@modelcontextprotocol/server';
+import { clearSharedPatTokens } from './asset';
 import { HttpTransportOptions, HubMCPServer } from './server';
 
 // Regression tests for RG-4626: the HTTP transport must not serve tools (which run
@@ -220,4 +221,52 @@ test('unknown tool error code is still InvalidParams (-32602)', async () => {
         assert.equal(body.error.code, ProtocolErrorCode.InvalidParams);
         assert.match(body.error.message, /Tool this-tool-does-not-exist not found/);
     });
+});
+
+test('two sequential tool calls share one Docker Hub login', async () => {
+    clearSharedPatTokens();
+    const exp = Math.floor(Date.now() / 1000) + 60 * 60;
+    const header = Buffer.from(JSON.stringify({ alg: 'none', typ: 'JWT' })).toString('base64url');
+    const payload = Buffer.from(JSON.stringify({ exp })).toString('base64url');
+    const jwt = `${header}.${payload}.sig`;
+    let logins = 0;
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+        const url =
+            typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+        if (url.includes('/v2/users/login')) {
+            logins += 1;
+            return new Response(JSON.stringify({ token: jwt, refresh_token: 'r' }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+        return new Response(JSON.stringify({ count: 0, next: null, previous: null, results: [] }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }) as typeof fetch;
+    const call = JSON.stringify({
+        jsonrpc: '2.0',
+        id: 3,
+        method: 'tools/call',
+        params: {
+            name: 'listRepositoriesByNamespace',
+            arguments: { namespace: 'library' },
+        },
+    });
+    try {
+        await withServer(AUTH_OPTIONS, async (port) => {
+            const first = await post(port, bearer, call);
+            const second = await post(port, bearer, call);
+            assert.equal(first.status, 200);
+            assert.equal(second.status, 200);
+            assert.equal(JSON.parse(first.body).error, undefined);
+            assert.equal(JSON.parse(second.body).error, undefined);
+        });
+        assert.equal(logins, 1);
+    } finally {
+        globalThis.fetch = originalFetch;
+        clearSharedPatTokens();
+    }
 });
