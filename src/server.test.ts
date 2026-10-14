@@ -1,5 +1,6 @@
 /*
    Copyright 2025 Docker Hub MCP Server authors
+   Modified by Exaltiq
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,6 +19,8 @@ import assert from 'node:assert/strict';
 import http from 'node:http';
 import { AddressInfo } from 'node:net';
 import { test } from 'node:test';
+import { NodeStreamableHTTPServerTransport } from '@modelcontextprotocol/node';
+import { McpServer, ProtocolErrorCode, SdkError, SdkErrorCode } from '@modelcontextprotocol/server';
 import { HttpTransportOptions, HubMCPServer } from './server';
 
 // Regression tests for RG-4626: the HTTP transport must not serve tools (which run
@@ -42,7 +45,11 @@ interface Response {
 
 // Uses the low-level http client (not fetch) so we can set otherwise-forbidden
 // request headers such as Host, which the DNS-rebinding guard inspects.
-function post(port: number, headers: Record<string, string>): Promise<Response> {
+function post(
+    port: number,
+    headers: Record<string, string>,
+    body: string = INIT_BODY
+): Promise<Response> {
     return new Promise((resolve, reject) => {
         const req = http.request(
             {
@@ -53,18 +60,18 @@ function post(port: number, headers: Record<string, string>): Promise<Response> 
                 headers: {
                     'Content-Type': 'application/json',
                     Accept: 'application/json, text/event-stream',
-                    'Content-Length': Buffer.byteLength(INIT_BODY),
+                    'Content-Length': Buffer.byteLength(body),
                     ...headers,
                 },
             },
             (res) => {
-                let body = '';
-                res.on('data', (chunk) => (body += chunk));
-                res.on('end', () => resolve({ status: res.statusCode ?? 0, body }));
+                let responseBody = '';
+                res.on('data', (chunk) => (responseBody += chunk));
+                res.on('end', () => resolve({ status: res.statusCode ?? 0, body: responseBody }));
             }
         );
         req.on('error', reject);
-        req.write(INIT_BODY);
+        req.write(body);
         req.end();
     });
 }
@@ -149,5 +156,68 @@ test('honours an explicitly allowed Origin', async () => {
     await withServer(options, async (port) => {
         const allowed = await post(port, { ...bearer, Origin: 'http://app.example' });
         assert.equal(allowed.status, 200);
+    });
+});
+
+// SDK 2.3+ throws SdkErrorCode.AlreadyConnected if connect() is called twice on
+// one McpServer. The pre-fix HTTP handler did exactly that (one server, a new
+// transport per POST), so the second stateless request failed. HubMCPServer now
+// builds a new server per POST; the test below is the regression, and this one
+// records the SDK failure the old pattern still hits.
+test('connecting one McpServer twice throws ALREADY_CONNECTED', async () => {
+    const mcp = new McpServer({ name: 'dockerhub-mcp-server', version: '1.0.0' });
+    const first = new NodeStreamableHTTPServerTransport({
+        sessionIdGenerator: undefined,
+        enableJsonResponse: true,
+    });
+    const second = new NodeStreamableHTTPServerTransport({
+        sessionIdGenerator: undefined,
+        enableJsonResponse: true,
+    });
+    await mcp.connect(first);
+    await assert.rejects(
+        () => mcp.connect(second),
+        (error: unknown) => {
+            assert.equal(SdkError.isInstance(error), true);
+            assert.equal((error as { code?: string }).code, SdkErrorCode.AlreadyConnected);
+            return true;
+        }
+    );
+    await mcp.close();
+});
+
+test('two sequential stateless POST /mcp requests both succeed', async () => {
+    await withServer(AUTH_OPTIONS, async (port) => {
+        const first = await post(port, bearer);
+        const second = await post(port, bearer);
+        assert.equal(first.status, 200);
+        assert.equal(second.status, 200);
+        const firstBody = JSON.parse(first.body);
+        const secondBody = JSON.parse(second.body);
+        assert.equal(firstBody.result.serverInfo.name, 'dockerhub-mcp-server');
+        assert.equal(secondBody.result.serverInfo.name, 'dockerhub-mcp-server');
+        assert.equal(firstBody.error, undefined);
+        assert.equal(secondBody.error, undefined);
+    });
+});
+
+test('unknown tool error code is still InvalidParams (-32602)', async () => {
+    const call = JSON.stringify({
+        jsonrpc: '2.0',
+        id: 2,
+        method: 'tools/call',
+        params: { name: 'this-tool-does-not-exist', arguments: {} },
+    });
+    await withServer(AUTH_OPTIONS, async (port) => {
+        const res = await post(port, bearer, call);
+        assert.equal(res.status, 200);
+        const body = JSON.parse(res.body);
+        // Same numeric code as v1 (ErrorCode.InvalidParams). v1 embedded it in an
+        // isError tool result ("MCP error -32602: Tool ... not found"); v2 reports
+        // it as the JSON-RPC error code.
+        assert.equal(ProtocolErrorCode.InvalidParams, -32602);
+        assert.equal(body.error.code, -32602);
+        assert.equal(body.error.code, ProtocolErrorCode.InvalidParams);
+        assert.match(body.error.message, /Tool this-tool-does-not-exist not found/);
     });
 });
