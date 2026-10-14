@@ -17,12 +17,11 @@
 
 import { Tool } from '@modelcontextprotocol/server';
 import { HubMCPServer } from '../server';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import _ from 'lodash';
 import fs from 'fs';
 import path from 'path';
 import { program } from 'commander';
-import { ZodTypeAny } from 'zod';
+import { z } from 'zod';
 
 const EMPTY_OBJECT_JSON_SCHEMA = {
     type: 'object' as const,
@@ -64,6 +63,11 @@ program
 
 program.parse();
 
+function schemaToJson(schema: z.ZodType): Tool['inputSchema'] {
+    // zod-to-json-schema left with the v1 SDK. Zod 4 emits the catalog schemas directly.
+    return z.toJSONSchema(schema, { target: 'draft-07', io: 'input' }) as Tool['inputSchema'];
+}
+
 function getToolDefinitionList(): { tools: Tool[] } {
     const server = new HubMCPServer();
     const tools = server.GetAssets().reduce(
@@ -74,17 +78,13 @@ function getToolDefinitionList(): { tools: Tool[] } {
                     name,
                     description: tool.title, // Use title instead of description to have less noise in the tools list
                     inputSchema: tool.inputSchema
-                        ? (zodToJsonSchema(tool.inputSchema as ZodTypeAny, {
-                              strictUnions: true,
-                          }) as Tool['inputSchema'])
+                        ? schemaToJson(tool.inputSchema as z.ZodType)
                         : EMPTY_OBJECT_JSON_SCHEMA,
                     annotations: tool.annotations,
                 };
 
                 if (tool.outputSchema) {
-                    toolDefinition.outputSchema = zodToJsonSchema(tool.outputSchema as ZodTypeAny, {
-                        strictUnions: true,
-                    }) as Tool['outputSchema'];
+                    toolDefinition.outputSchema = schemaToJson(tool.outputSchema as z.ZodType);
                 }
 
                 acc.tools.push(toolDefinition);

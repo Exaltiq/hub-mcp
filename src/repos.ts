@@ -234,7 +234,6 @@ export class Repos extends Asset {
         // List Repositories by Namespace
         this.tools.set(
             'listRepositoriesByNamespace',
-            /* @mcp-codemod-error Could not verify `outputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'listRepositoriesByNamespace',
                 {
@@ -277,7 +276,7 @@ export class Repos extends Asset {
                                 'Comma-delimited list of content types. Only repositories containing one or more artifacts with one of these content types will be returned. Default is empty to get all repositories.'
                             ),
                     }),
-                    outputSchema: repositoryPaginatedResponseSchema.shape,
+                    outputSchema: repositoryPaginatedResponseSchema,
                     annotations: {
                         title: 'List Repositories by Namespace',
                     },
@@ -289,14 +288,13 @@ export class Repos extends Asset {
         // Create Repository
         this.tools.set(
             'createRepository',
-            /* @mcp-codemod-error Could not verify `inputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. | Could not verify `outputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'createRepository',
                 {
                     description:
                         'Create a new repository in the given namespace. You MUST ask the user for the repository name and if the repository has to be public or private. Can optionally pass a description.\nIMPORTANT: Before calling this tool, you must ensure you have:\n The repository name (name).',
-                    inputSchema: CreateRepositoryRequest.shape,
-                    outputSchema: Repository.shape,
+                    inputSchema: CreateRepositoryRequest,
+                    outputSchema: Repository,
                     annotations: {
                         title: 'Create Repository in namespace',
                     },
@@ -308,7 +306,6 @@ export class Repos extends Asset {
         // Get Repository Info
         this.tools.set(
             'getRepositoryInfo',
-            /* @mcp-codemod-error Could not verify `inputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. | Could not verify `outputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'getRepositoryInfo',
                 {
@@ -320,8 +317,8 @@ export class Repos extends Asset {
                                 'The namespace of the repository (required). If not provided the `library` namespace will be used for official images.'
                             ),
                         repository: z.string().describe('The repository name (required)'),
-                    }).shape,
-                    outputSchema: Repository.shape,
+                    }),
+                    outputSchema: Repository,
                     annotations: {
                         title: 'Get Repository Info',
                     },
@@ -334,7 +331,6 @@ export class Repos extends Asset {
         // Update Repository Info
         this.tools.set(
             'updateRepositoryInfo',
-            /* @mcp-codemod-error Could not verify `inputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. | Could not verify `outputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'updateRepositoryInfo',
                 {
@@ -365,8 +361,8 @@ export class Repos extends Asset {
                             .describe(
                                 'The status of the repository. If user asks for updating the status of the repository, this is the field that should be updated. This is a dangerous operation and should be done with caution so user must be prompted to confirm the operation. Valid status are `active` (1) and `inactive` (0). Normally do not update the status if it is not strictly required by the user. It is not possible to change an `inactive` repository to `active` if it has no images.'
                             ),
-                    }).shape,
-                    outputSchema: Repository.shape,
+                    }),
+                    outputSchema: Repository,
                     annotations: {
                         title: 'Get Repository Info',
                     },
@@ -379,12 +375,11 @@ export class Repos extends Asset {
         // Check Repository Exists
         this.tools.set(
             'checkRepository',
-            /* @mcp-codemod-error Could not verify `inputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'checkRepository',
                 {
                     description: 'Check if a repository exists in the given namespace.',
-                    inputSchema: z.object({ namespace: z.string(), repository: z.string() }).shape,
+                    inputSchema: z.object({ namespace: z.string(), repository: z.string() }),
                     annotations: {
                         title: 'Check Repository Exists',
                     },
@@ -397,7 +392,6 @@ export class Repos extends Asset {
         // List Repository Tags
         this.tools.set(
             'listRepositoryTags',
-            /* @mcp-codemod-error Could not verify `inputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. | Could not verify `outputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'listRepositoryTags',
                 {
@@ -433,8 +427,8 @@ export class Repos extends Asset {
                             .describe(
                                 'Filter tags by name substring. Useful for resolving a partial git SHA (e.g. a short commit hash) to a full tag.'
                             ),
-                    }).shape,
-                    outputSchema: repositoryTagPaginatedResponseSchema.shape,
+                    }),
+                    outputSchema: repositoryTagPaginatedResponseSchema,
                     annotations: {
                         title: 'List Repository Tags',
                     },
@@ -447,7 +441,6 @@ export class Repos extends Asset {
         // Get Repository Tag
         this.tools.set(
             'getRepositoryTag',
-            /* @mcp-codemod-error Could not verify `inputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. | Could not verify `outputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'getRepositoryTag',
                 {
@@ -457,8 +450,8 @@ export class Repos extends Asset {
                         namespace: z.string(),
                         repository: z.string(),
                         tag: z.string(),
-                    }).shape,
-                    outputSchema: RepositoryTag.shape,
+                    }),
+                    outputSchema: RepositoryTag,
                     annotations: {
                         title: 'Get Repository Tag',
                     },
@@ -470,7 +463,6 @@ export class Repos extends Asset {
         // Check Repository Tag
         this.tools.set(
             'checkRepositoryTag',
-            /* @mcp-codemod-error Could not verify `inputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'checkRepositoryTag',
                 {
@@ -479,7 +471,7 @@ export class Repos extends Asset {
                         namespace: z.string(),
                         repository: z.string(),
                         tag: z.string(),
-                    }).shape,
+                    }),
                     annotations: {
                         title: 'Check Repository Tag',
                     },
