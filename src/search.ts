@@ -91,7 +91,6 @@ export class Search extends Asset {
     RegisterTools(): void {
         this.tools.set(
             'search',
-            /* @mcp-codemod-error Could not verify `outputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'search',
                 {
@@ -156,7 +155,7 @@ export class Search extends Asset {
                             .optional()
                             .describe('The images to filter search results'),
                     }),
-                    outputSchema: searchResults.shape,
+                    outputSchema: searchResults,
                     annotations: {
                         title: 'Search Repositories',
                     },

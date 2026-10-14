@@ -58,7 +58,6 @@ export class ScoutAPI extends Asset {
     RegisterTools(): void {
         this.tools.set(
             'dockerHardenedImages',
-            /* @mcp-codemod-error Could not verify `inputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'dockerHardenedImages',
                 {
@@ -70,7 +69,7 @@ export class ScoutAPI extends Asset {
                             .describe(
                                 'The organisation for which the DHIs are listed for. If user does not explicitly ask for a specific organisation, the "listNamespaces" tool should be called first to get the list of organisations the user has access to.'
                             ),
-                    }).shape,
+                    }),
                     annotations: {
                         title: 'List available Docker Hardened Images',
                     },

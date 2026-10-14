@@ -58,7 +58,6 @@ export class Accounts extends Asset {
     RegisterTools(): void {
         this.tools.set(
             'listNamespaces',
-            /* @mcp-codemod-error Could not verify `outputSchema` is a schema object. Raw shapes are deprecated in v2 — pass a Standard Schema object (e.g. z.object({ … })); no change is needed if it already is one. */
             this.server.registerTool(
                 'listNamespaces',
                 {
@@ -73,7 +72,7 @@ export class Accounts extends Asset {
                             .optional()
                             .describe('The page size to list repositories from'),
                     }),
-                    outputSchema: namespacePaginatedResponseSchema.shape,
+                    outputSchema: namespacePaginatedResponseSchema,
                     annotations: {
                         title: 'List Namespaces',
                     },
