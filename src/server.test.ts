@@ -187,6 +187,34 @@ test('connecting one McpServer twice throws ALREADY_CONNECTED', async () => {
     await mcp.close();
 });
 
+test('stateless POST /mcp closes the per-request server and transport', async () => {
+    let serverCloses = 0;
+    let transportCloses = 0;
+    const originalServerClose = McpServer.prototype.close;
+    const originalTransportClose = NodeStreamableHTTPServerTransport.prototype.close;
+    McpServer.prototype.close = function (this: McpServer) {
+        serverCloses += 1;
+        return originalServerClose.call(this);
+    };
+    NodeStreamableHTTPServerTransport.prototype.close = function (
+        this: NodeStreamableHTTPServerTransport
+    ) {
+        transportCloses += 1;
+        return originalTransportClose.call(this);
+    };
+    try {
+        await withServer(AUTH_OPTIONS, async (port) => {
+            assert.equal((await post(port, bearer)).status, 200);
+            await new Promise((resolve) => setImmediate(resolve));
+            assert.equal(serverCloses, 1);
+            assert.equal(transportCloses, 1);
+        });
+    } finally {
+        McpServer.prototype.close = originalServerClose;
+        NodeStreamableHTTPServerTransport.prototype.close = originalTransportClose;
+    }
+});
+
 test('two sequential stateless POST /mcp requests both succeed', async () => {
     await withServer(AUTH_OPTIONS, async (port) => {
         const first = await post(port, bearer);
